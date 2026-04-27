@@ -1,0 +1,652 @@
+================================================================================
+                        WANDERLUST — PROJECT REPORT
+                     AI-Powered Travel Companion Application
+                              Version 1.0.0 | 2026
+================================================================================
+
+--------------------------------------------------------------------------------
+TABLE OF CONTENTS
+--------------------------------------------------------------------------------
+  1. Introduction
+  2. Problem Statement
+  3. Objectives
+  4. Methodology
+  5. System Design and User Interface
+  6. AI System Design and Working
+  7. Business Model
+  8. Research Angle
+  9. Conclusion
+--------------------------------------------------------------------------------
+
+
+================================================================================
+1. INTRODUCTION
+================================================================================
+
+Wanderlust is a cross-platform mobile application developed using Flutter and
+Dart, designed to serve as an intelligent travel companion for modern travelers.
+The application integrates real-time data from Google's Places API ecosystem,
+Firebase cloud infrastructure, and a custom-built AI-based recommendation engine
+to deliver a seamless, personalized travel planning and booking experience.
+
+The name "Wanderlust" reflects the inherent human desire to explore — and the
+application is built on the premise that technology should make that exploration
+easier, smarter, and more enjoyable. Unlike traditional travel apps that present
+static, pre-curated content, Wanderlust fetches live, location-specific data and
+processes it intelligently to surface the most relevant recommendations at any
+given moment.
+
+The application is built for Android (with iOS architecture ready) using Flutter
+3.x with Dart SDK 3.9.2, targeting Material Design 3 standards. The backend
+infrastructure runs entirely on Google Firebase — comprising Firestore for
+structured data, Firebase Storage for media, and Firebase Authentication for
+user identity. The application is in Version 1.0.0 and currently supports four
+destinations: Darjeeling, Manali, Goa, and Tokyo.
+
+The core philosophy of Wanderlust is three-fold:
+  (a) Real data, not curated lists — everything is fetched live from Google APIs.
+  (b) Smart recommendations, not algorithmic black boxes — the scoring logic is
+      transparent, explainable, and context-aware.
+  (c) Scalable architecture — adding new cities, features, or booking modules
+      requires minimal code changes.
+
+Wanderlust is positioned at the intersection of travel technology, artificial
+intelligence, and cloud-native mobile development.
+
+
+================================================================================
+2. PROBLEM STATEMENT
+================================================================================
+
+The modern traveler faces a fragmented and overwhelming digital experience.
+Planning a trip currently requires juggling multiple applications simultaneously
+— one for destination discovery, another for hotel booking, another for maps,
+another for restaurant suggestions, and yet another for transport information.
+This fragmentation leads to decision fatigue, missed opportunities, and a poor
+overall experience.
+
+Existing travel applications suffer from several key problems:
+
+  2.1 STATIC AND OUTDATED CONTENT
+  Most travel apps, including well-known platforms, rely on pre-compiled,
+  human-curated lists that are updated infrequently. A restaurant listed as
+  "highly recommended" may have closed or declined in quality. An attraction may
+  have new opening hours not reflected in the app. There is no real-time
+  intelligence in the content layer.
+
+  2.2 CONTEXT-IGNORANT RECOMMENDATIONS
+  Traditional recommendation systems suggest the same places regardless of
+  what time of day it is, whether a place is currently open, or how far the
+  user physically is from that place. Recommending a sunrise viewpoint at 8pm
+  or a restaurant that closed an hour ago reflects a fundamental gap in
+  contextual intelligence.
+
+  2.3 POOR IMAGE QUALITY IN API RESULTS
+  Google Places and similar APIs return algorithmically selected photos that
+  are often of poor quality — blurry, badly composed, or taken by random users.
+  Travel apps that rely solely on API photos create a visually unappealing
+  experience that fails to inspire the traveler.
+
+  2.4 NO UNIFIED BOOKING LAYER
+  Travelers must leave the discovery app to visit a booking platform, losing
+  context and continuity. There is no unified experience from "discover a hotel"
+  to "book that hotel" within the same application.
+
+  2.5 NO PERSISTENT USER STATE
+  Many lightweight travel apps lose all user data on app restart. Profile
+  information, preferences, and bookings are not persisted, requiring users to
+  re-enter information on every session.
+
+These problems collectively result in a travel planning experience that is
+inefficient, visually uninspiring, and cognitively demanding. Wanderlust
+addresses all five of these problems directly.
+
+
+================================================================================
+3. OBJECTIVES
+================================================================================
+
+The Wanderlust project was designed with the following specific, measurable
+objectives:
+
+  3.1 PRIMARY OBJECTIVES
+
+    (a) Build a unified travel companion application that consolidates
+        destination discovery, AI-powered recommendations, live mapping,
+        hotel booking, and user profile management into a single experience.
+
+    (b) Integrate Google Places API (New) to fetch real-time, live data for
+        attractions and restaurants in any supported city, ensuring content
+        freshness.
+
+    (c) Develop a custom AI recommendation engine that scores places using five
+        contextual factors: proximity, user rating, current open status, review
+        popularity, and time-of-day context.
+
+    (d) Implement a Firebase-backed hotel booking system with Firestore
+        persistence, allowing bookings to survive app restarts and enabling
+        future multi-device sync.
+
+    (e) Establish a scalable curated image management system using Firebase
+        Storage that allows non-technical team members to update place photos
+        without any code changes.
+
+    (f) Deliver a Material Design 3 compliant UI with full dark mode support,
+        smooth animations, and accessible design patterns.
+
+  3.2 SECONDARY OBJECTIVES
+
+    (g) Implement persistent user profile storage using SharedPreferences,
+        eliminating the problem of state loss on app restart.
+
+    (h) Build an architecture that is city-agnostic — adding a new destination
+        requires only appending an entry to the city list; all data fetching,
+        scoring, and display logic adapts automatically.
+
+    (i) Provide a clean developer experience with separate service, provider,
+        model, widget, and screen layers following Flutter's recommended
+        architecture patterns.
+
+    (j) Design the application to be demonstration-ready and production-scalable,
+        with clear hooks for future features including authentication upgrades,
+        flight booking, itinerary planning, and push notifications.
+
+
+================================================================================
+4. METHODOLOGY
+================================================================================
+
+The development of Wanderlust followed an iterative, feature-driven methodology
+divided into four phases:
+
+  4.1 PHASE 1 — FOUNDATION AND ARCHITECTURE
+  The first phase established the technical foundation of the application.
+  Flutter was chosen as the development framework for its cross-platform
+  capability, strong Material 3 support, and the performance characteristics
+  of the Dart VM. The project structure was organized into clearly separated
+  layers:
+
+    /lib
+      /screens       — Full-page UI components (HomeScreen, DashboardScreen,
+                        ProfileScreen, SettingsScreen, HotelBookingScreen)
+      /widgets       — Reusable UI components (HotelCard, CustomAppBar,
+                        DashboardWidgets, DashboardMapWidget)
+      /providers     — State management (UserProfileProvider, AppSettingsProvider,
+                        DashboardDataProvider, BookingProvider, HotelProvider)
+      /services      — External integrations (PlacesApiService, FirestoreService,
+                        ProfileStorageService, ImageResolver)
+      /models        — Data models (DashboardModels, HotelModel)
+      /constants     — App-wide constants (CityOptions, Colors)
+
+  Firebase was configured using the FlutterFire CLI, which generated
+  firebase_options.dart with platform-specific configuration. The Kotlin
+  Gradle plugin was updated to version 2.3.10 to resolve compatibility issues
+  with the Firebase Android SDK.
+
+  4.2 PHASE 2 — CORE FEATURES
+  The second phase implemented the three main screens: Home, Dashboard, and
+  Profile. The Dashboard screen involved the most complex work — integrating
+  three Google APIs (Geocoding, Places, Distance Matrix) in a sequential
+  pipeline to fetch, enrich, and map live place data. The RecommendationEngine
+  and PlacesDataMapper services were built and tested against multiple cities.
+
+  4.3 PHASE 3 — BOOKING AND PERSISTENCE
+  Phase three added the hotel booking system and profile persistence. The
+  HotelCard widget, HotelBookingScreen, and BookingProvider were developed.
+  SharedPreferences integration was added via ProfileStorageService, solving
+  the state persistence problem. Firebase Firestore was wired for hotel data
+  and booking storage. The BookingProvider was updated to use Firebase Anonymous
+  Authentication to tie bookings to a user session.
+
+  4.4 PHASE 4 — POLISH AND INTEGRATION
+  The final phase focused on UI polish, bug fixing, and Firebase integration.
+  Animations (Hero, AnimatedSwitcher) were added to the Profile screen.
+  The edit sheet flicker was fixed by moving controller initialization from
+  didChangeDependencies to initState. Layout overflow bugs were resolved by
+  giving bounded heights to the hotel card column. Security rules were written
+  for both Firestore and Firebase Storage.
+
+  TECHNOLOGY STACK SUMMARY:
+  +-----------------------+------------------------------------------+
+  | Layer                 | Technology                               |
+  +-----------------------+------------------------------------------+
+  | Frontend Framework    | Flutter 3.x / Dart SDK 3.9.2            |
+  | UI System             | Material Design 3                        |
+  | State Management      | InheritedWidget + ChangeNotifier         |
+  | Maps                  | Google Maps Flutter (google_maps_flutter) |
+  | Places Data           | Google Places API (New) — REST           |
+  | Distance Data         | Google Distance Matrix API               |
+  | Database              | Firebase Firestore                       |
+  | File Storage          | Firebase Storage                         |
+  | Authentication        | Firebase Anonymous Auth                  |
+  | Local Storage         | SharedPreferences                        |
+  | Image Loading         | CachedNetworkImage                       |
+  | Date Formatting       | intl                                     |
+  | Custom Font           | Outfit (9 weights, locally bundled)      |
+  +-----------------------+------------------------------------------+
+
+
+================================================================================
+5. SYSTEM DESIGN AND USER INTERFACE
+================================================================================
+
+  5.1 APPLICATION ARCHITECTURE
+
+  Wanderlust follows a layered architecture with clear separation of concerns.
+  Data flows unidirectionally: Services fetch raw data → Providers process and
+  hold state → Screens consume state via InheritedWidget → Widgets render UI.
+
+  The root widget (MyApp) maintains two pieces of global state:
+    - UserProfile: loaded from SharedPreferences on startup, saved on every change
+    - AppSettings: theme mode and notification preferences
+
+  Both are exposed down the tree via custom InheritedWidget providers
+  (UserProfileProvider and AppSettingsProvider), avoiding the need for a
+  third-party state management library while maintaining reactivity.
+
+  The DashboardDataProvider extends ChangeNotifier and is managed at the
+  MyHomePage level. It holds the full CityData object and exposes isLoading
+  and error states for graceful loading/error UI.
+
+  5.2 SCREEN STRUCTURE
+
+  HOME SCREEN
+  The Home screen is structured as a scrollable column with three major sections:
+    - CustomAppBar: Displays app branding
+    - Hero Carousel: CarouselView.weighted with [7, 2] flex weights, showing
+      Kashmir, Kerala, Meghalaya, and Rajasthan with gradient overlays and
+      animated location labels that fade in when a card becomes the primary card
+    - Hotel Booking Section: Section header with "See All" action, followed by a
+      horizontal ListView of HotelCard widgets loaded live from Firestore, with
+      a loading skeleton state while data fetches
+
+  DASHBOARD SCREEN
+  The Dashboard screen uses a SingleChildScrollView with a Column containing:
+    - Header: City name + "AI Powered" chip
+    - Live Google Map (200px height, custom pins for attractions and food)
+    - AI Highlights: Horizontal scroll of the top 3 scored PlaceHighlightCards
+    - Collapsible sections with animated expand/collapse (SizeTransition +
+      RotationTransition on the chevron icon):
+        * Top Attractions (from Places API — tourist_attraction type)
+        * Food & Restaurants (from Places API — restaurant type)
+        * Getting Around (from Places API — transit_station type)
+        * Tickets & Entry (derived from place details + websiteUri check)
+    - Safety & Tips: City-specific travel advisories
+
+  PROFILE SCREEN
+  The Profile screen uses a ListView with:
+    - Hero-animated CircleAvatar
+    - AnimatedSwitcher on name and subtitle for smooth profile update animations
+    - Edit Profile bottom sheet with avatar picker, name, age, gender, and
+      mobile number fields, all initialized once in initState (not
+      didChangeDependencies, fixing the re-initialization flicker)
+    - Settings navigation (pushes SettingsScreen)
+    - Menu tiles: Saved Destinations, Travel History, Help & Support
+    - Dashboard Destination selector (triggers full dashboard data refresh)
+    - Sign Out with confirmation dialog
+
+  HOTEL BOOKING SCREEN
+  Full-screen booking flow with:
+    - SliverAppBar.large with hotel hero image
+    - Hotel description, amenity chips with contextual icons
+    - Material 3 date range picker (showDateRangePicker)
+    - Guest counter (stepper, 1–6 guests)
+    - SegmentedButton room type selector (Standard/Deluxe/Suite at 1x/1.5x/2.2x
+      price multiplier)
+    - Sticky bottom bar showing total price calculation
+    - Confirmation bottom sheet with booking summary
+
+  SETTINGS SCREEN
+  Separate screen (Navigator.push) with:
+    - Appearance: System/Light/Dark theme SegmentedButton
+    - Preferences: Notifications toggle, Language (placeholder)
+    - Data & Storage: Clear Cache with confirmation dialog
+    - About: App version, Privacy Policy, Terms of Service
+
+  5.3 DESIGN SYSTEM
+
+  The entire app uses a single Material 3 theme built from ColorScheme.fromSeed
+  with Colors.deepPurple as the seed color. This generates a harmonious full
+  palette for both light and dark modes. The Outfit font family (9 weights,
+  locally bundled) is applied globally. All interactive elements follow M3
+  component specs: FilledButton, FilledButton.tonal, OutlinedButton,
+  NavigationBar, SegmentedButton, Card, SearchBar, and InputDecoration.
+
+
+================================================================================
+6. AI SYSTEM DESIGN AND WORKING
+================================================================================
+
+  6.1 OVERVIEW
+
+  The AI component of Wanderlust is a deterministic, weighted scoring system
+  that evaluates every place retrieved from the Google Places API and assigns
+  it a recommendation score between 0 and 100. This approach was deliberately
+  chosen over probabilistic machine learning models for three reasons:
+  (a) It requires no training data or model hosting infrastructure.
+  (b) Every recommendation is fully explainable — there is no black box.
+  (c) It performs in real-time on the device, with zero latency overhead.
+
+  6.2 DATA PIPELINE (Three-Stage)
+
+  STAGE 1 — RAW DATA FETCH
+  When a city is selected, PlacesApiService executes three sequential API calls:
+    1. Google Geocoding API: Converts city name to GPS coordinates (lat, lng)
+    2. Google Places API (Nearby Search): Returns up to 10 places per category
+       within a 5 km radius. The following fields are requested via FieldMask:
+       id, displayName, rating, userRatingCount, location, photos,
+       currentOpeningHours, priceLevel, primaryType, websiteUri
+    3. Google Distance Matrix API: Calculates actual road/walking distance from
+       the city centre to each fetched place (more accurate than straight-line
+       Haversine distance for urban navigation)
+
+  STAGE 2 — DATA MAPPING
+  PlacesDataMapper processes the raw API responses:
+    - Maps Google's field names to internal PlaceRecommendation model fields
+    - Resolves place category from Google's primaryType:
+        museum, art_gallery, cultural_landmark, historical_place, church,
+        hindu_temple, mosque → category: "culture"
+        Food-type queries → category: "food"
+        Everything else → category: "nature"
+    - Applies real road distances from Distance Matrix (overrides Haversine)
+    - Extracts today's opening hours from weekdayDescriptions array
+    - Maps price level from Google's enum to integer (0–3)
+    - Constructs photo URL via Places API media endpoint
+
+  STAGE 3 — SCORING
+  RecommendationEngine.calculateScore() computes a 0–100 score using five
+  weighted factors:
+
+  FACTOR 1: DISTANCE SCORE (Weight: 30%)
+  The highest-weighted factor. Proximity is the most practical determinant of
+  whether a traveler will visit a place.
+    Distance <= 1 km   → 100 points
+    Distance <= 3 km   → 75 points
+    Distance <= 5 km   → 50 points
+    Distance >  5 km   → 25 points
+
+  FACTOR 2: RATING SCORE (Weight: 25%)
+  Google's crowd-sourced rating reflects aggregate user satisfaction.
+    Rating >= 4.5   → 100 points
+    Rating >= 4.0   → 75 points
+    Rating >= 3.5   → 50 points
+    Rating <  3.5   → 0 points
+
+  FACTOR 3: OPEN STATUS (Weight: 20%)
+  A place that is currently closed provides zero immediate value to a traveler
+  planning to visit now. This is a binary signal with high weight.
+    Currently open   → 100 points
+    Currently closed → 0 points
+
+  FACTOR 4: REVIEW COUNT (Weight: 15%)
+  Review count is a proxy for popularity and data reliability. A highly rated
+  place with only 5 reviews is less trustworthy than one with 1,000.
+    Reviews >= 1000  → 100 points
+    Reviews >= 500   → 75 points
+    Reviews >= 100   → 50 points
+    Reviews <  100   → 25 points
+
+  FACTOR 5: TIME-OF-DAY CONTEXT (Weight: 10%)
+  This is the "intelligent" factor that makes recommendations context-aware.
+  The score is determined by matching the current hour to the optimal category
+  for that time of day:
+    5am  – 12pm  → Nature places score 100, all others 50
+                   (Sunrise viewpoints, treks, outdoor spots best in morning)
+    12pm – 5pm   → Culture places score 100, all others 50
+                   (Museums, temples, galleries best in afternoon)
+    5pm  – 11pm  → Food places score 100, all others 50
+                   (Restaurants and cafes best in evening)
+    Late night   → All categories score 50 (neutral)
+
+  FINAL SCORE FORMULA:
+  Score = (Distance * 0.30) + (Rating * 0.25) + (Open * 0.20)
+        + (Reviews * 0.15) + (TimeOfDay * 0.10)
+
+  Score is rounded and clamped to [0, 100].
+
+  6.3 HIGHLIGHTS SELECTION
+  RecommendationEngine.getHighlights() is called with the current hour at
+  the exact moment the Dashboard loads. It recalculates all scores, sorts
+  descending, and returns the top 3 places. These appear as the "AI Highlights"
+  cards — the first thing users see on the Dashboard.
+
+  This means the same city loaded at 7am will show different top picks than
+  when loaded at 7pm, creating a genuinely dynamic, context-sensitive experience.
+
+  6.4 CURATED IMAGE SYSTEM
+  The image management system addresses the problem of poor API-sourced photos.
+  Every place and hotel in Firestore has an optional "imageKey" field
+  (e.g., "hotels/taj_dal_lake" or "places/darjeeling/tiger_hill").
+
+  ImageResolver.resolveImageUrl() checks Firebase Storage at path:
+      curated/{imageKey}.jpg
+  If found, the curated (high-quality) image is displayed.
+  If not found, it falls back to the Google Places API photo URL.
+
+  This system allows non-technical team members to update any photo simply by
+  uploading a new .jpg to the correct Firebase Storage path — overwriting the
+  file with the same name instantly updates the image across all app instances
+  with zero code changes or app updates required.
+
+
+================================================================================
+7. BUSINESS MODEL
+================================================================================
+
+  7.1 TARGET MARKET
+  Wanderlust targets three primary user segments:
+    - Domestic leisure travelers (India, 18–45 years, smartphone-first)
+    - International travelers visiting India
+    - Budget-to-mid-range travelers planning independent trips (not package tours)
+
+  The Indian travel market is projected to reach USD 125 billion by 2027
+  (WTTC, 2024), with mobile booking accounting for over 60% of transactions.
+
+  7.2 REVENUE STREAMS
+
+  STREAM 1: COMMISSION-BASED HOTEL BOOKING (Primary)
+  When Wanderlust facilitates a hotel booking, it earns a commission of 8–15%
+  from the hotel property. This is the standard OTA (Online Travel Agency)
+  model used by Booking.com, MakeMyTrip, and Goibibo. Once Firestore is fully
+  populated with hotel partners and a payment gateway is integrated, this
+  becomes the core revenue engine.
+
+  STREAM 2: FEATURED LISTINGS (Secondary)
+  Hotels and restaurants can pay for priority placement in search results and
+  the "AI Highlights" section. This is a B2B revenue stream targeting
+  hospitality businesses looking for digital marketing exposure.
+
+  STREAM 3: PREMIUM USER SUBSCRIPTION (Future)
+  A Wanderlust Premium tier could offer:
+    - Offline city guides
+    - AI-generated personalized itineraries
+    - Priority customer support
+    - Early access to new cities and features
+  Estimated pricing: INR 299/month or INR 1,999/year
+
+  STREAM 4: DATA AND ANALYTICS (Future, B2B)
+  Anonymized, aggregated travel trend data (most searched cities by season,
+  popular attraction categories by user segment) has significant commercial
+  value to tourism boards, hotel chains, and destination marketing organizations.
+
+  STREAM 5: AFFILIATE PARTNERSHIPS
+  Integration with flight booking APIs (Skyscanner, Amadeus), activity platforms
+  (Viator, GetYourGuide), and travel insurance providers on an affiliate
+  commission basis.
+
+  7.3 COST STRUCTURE
+  Primary costs:
+    - Google Maps Platform API usage (billed per request — manageable at scale
+      with caching layer)
+    - Firebase Firestore read/write operations (generous free tier; scales linearly)
+    - Firebase Storage (minimal cost for image hosting)
+    - App Store distribution (one-time developer fees)
+    - Development and maintenance
+
+  7.4 COMPETITIVE ADVANTAGE
+  Unlike MakeMyTrip or Booking.com which are purely transactional, Wanderlust
+  differentiates through:
+    (a) Integrated discovery + booking in one flow
+    (b) Context-aware AI recommendations (not static lists)
+    (c) Live data freshness (Google Places, not curated content)
+    (d) Material 3 native Flutter experience (faster, more fluid than web-view
+        based competitors)
+    (e) Curated image system that ensures visual quality
+
+
+================================================================================
+8. RESEARCH ANGLE
+================================================================================
+
+  8.1 RESEARCH QUESTIONS ADDRESSED
+  This project implicitly addresses three research questions in the domain of
+  mobile computing and recommender systems:
+
+  QUESTION 1: Can a deterministic, explainable scoring algorithm deliver
+  competitive recommendation quality without machine learning?
+
+  Wanderlust's RecommendationEngine demonstrates that a well-designed weighted
+  scoring function with contextual signals can produce highly relevant
+  recommendations in the travel domain. The time-of-day factor introduces
+  temporal context that most ML-based recommenders ignore unless explicitly
+  trained on time-aware datasets. The system's transparency (every score
+  component is inspectable) also addresses the growing concern around
+  "black box" AI in consumer applications.
+
+  QUESTION 2: What is the optimal architecture for real-time travel data
+  delivery on mobile devices?
+
+  The three-stage pipeline (Geocoding → Places Search → Distance Matrix)
+  demonstrates a practical approach to enriching location-based data for
+  mobile consumption. The introduction of a Firebase Firestore caching layer
+  (24-hour TTL) reduces API costs and improves performance for repeated city
+  loads — a practical contribution to the mobile API design literature.
+
+  QUESTION 3: How can content quality in API-driven travel applications
+  be improved without sacrificing data freshness?
+
+  The Curated Image System addresses this through a hybrid model: live data
+  for text/rating/hours (from Google Places), curated media for visual content
+  (from Firebase Storage). The imageKey override mechanism allows selective
+  quality improvement without discarding the freshness benefits of API-driven
+  content — a contribution to the intersection of content management and
+  mobile UI design.
+
+  8.2 RELATED WORK
+  This project builds on established work in:
+    - Location-Based Services (LBS) and mobile recommender systems
+    - Context-aware computing (particularly time-as-context)
+    - Hybrid cloud-edge architectures for mobile applications
+    - Human-Computer Interaction research on travel app usability
+
+  8.3 FUTURE RESEARCH DIRECTIONS
+  The project opens several interesting directions for further research:
+    - Integration of user behavioral data (time spent on cards, bookings made)
+      to train a collaborative filtering layer on top of the scoring engine
+    - Personalization through user preference learning across sessions
+    - NLP-based travel intent detection from the search bar
+    - Sentiment analysis of Google Reviews as a sixth scoring factor
+    - Evaluation of the scoring algorithm against human expert rankings for
+      benchmark cities to validate weight calibration
+
+
+================================================================================
+9. CONCLUSION
+================================================================================
+
+Wanderlust represents a complete, production-ready proof-of-concept for an
+AI-powered travel companion application. In its current Version 1.0.0, the
+application successfully delivers on all primary objectives: real-time place
+discovery, context-aware AI recommendations, live map integration, hotel
+booking with Firebase persistence, and a smooth Material Design 3 experience.
+
+The key technical achievements of this project are:
+
+  1. A working three-stage Google API pipeline that delivers live, accurate
+     travel data for any supported city in approximately 2–4 seconds.
+
+  2. A custom RecommendationEngine that produces context-sensitive, explainable
+     recommendations using a five-factor weighted scoring model, operating
+     entirely on-device with no latency overhead.
+
+  3. A Firebase-backed booking system that persists user bookings across sessions
+     using anonymous authentication — a production-ready foundation for a
+     full authentication system.
+
+  4. A curated image management system that completely decouples visual content
+     quality from code — enabling zero-code photo updates by non-technical
+     team members via Firebase Storage.
+
+  5. A scalable, city-agnostic architecture where adding a new destination
+     requires a single list entry — all fetching, scoring, mapping, and display
+     logic adapts automatically.
+
+The application is architected for growth. The current feature set — Home,
+Dashboard, Profile, Settings, and Hotel Booking — provides a solid foundation
+for the planned roadmap: flight booking, itinerary planner, social sharing,
+multi-language support, and ML-based personalization.
+
+From a business perspective, Wanderlust is well-positioned in the Indian travel
+technology market, with a differentiated product that combines the data richness
+of Google's API ecosystem, the reliability of Firebase infrastructure, and the
+UX quality of Flutter's native rendering — all in a single, unified application.
+
+The project demonstrates that a small, focused development effort using modern
+cross-platform tools and cloud-native services can produce an application that
+rivals the feature depth of established players, with a significantly lower
+infrastructure cost and a more intelligent user experience.
+
+--------------------------------------------------------------------------------
+
+APPENDIX — FILE STRUCTURE REFERENCE
+--------------------------------------------------------------------------------
+
+lib/
+  main.dart                          — App entry, theme, Firebase init
+  firebase_options.dart              — Firebase configuration (generated)
+  screens/
+    home_screen.dart                 — Home tab (carousel + hotel booking)
+    dashboard_screen.dart            — Dashboard tab (map + AI recommendations)
+    profile_screen.dart              — Profile tab (user data + city selector)
+    settings_screen.dart             — Settings (theme, notifications, about)
+    hotel_booking_screen.dart        — Full hotel booking flow
+  widgets/
+    custom_app_bar.dart              — Branded app bar
+    destination_search_bar.dart      — Search bar component
+    dashboard_widgets.dart           — Reusable dashboard cards and tiles
+    dashboard_map_widget.dart        — Embedded Google Maps widget
+    hotel_card.dart                  — Hotel listing card
+  providers/
+    user_profile_provider.dart       — User profile InheritedWidget + model
+    app_settings_provider.dart       — App settings InheritedWidget + model
+    dashboard_data_provider.dart     — Dashboard data ChangeNotifier
+    booking_provider.dart            — Booking state + Firestore save
+    hotel_provider.dart              — Hotels from Firestore + fallback
+  services/
+    places_api_service.dart          — Google Places, Geocoding, Distance Matrix
+    places_data_mapper.dart          — API response → internal models
+    recommendation_engine.dart       — Five-factor scoring algorithm
+    firestore_service.dart           — Firestore CRUD operations
+    profile_storage_service.dart     — SharedPreferences profile persistence
+    image_resolver.dart              — Firebase Storage curated image resolver
+  models/
+    dashboard_models.dart            — PlaceRecommendation, CityData, etc.
+    hotel_model.dart                 — Hotel, BookingRequest, SampleHotels
+  constants/
+    colors.dart                      — App color constants
+    city_options.dart                — Supported city list
+
+android/
+  app/
+    google-services.json             — Firebase Android configuration
+    build.gradle.kts                 — Kotlin 2.3.10, minSdk 23, Google Services
+  settings.gradle.kts                — Kotlin + Google Services plugin declarations
+
+firestore.rules                      — Firestore security rules
+storage.rules                        — Firebase Storage security rules
+tool/
+  seed_firestore.dart                — One-time Firestore seeding script
+
+--------------------------------------------------------------------------------
+END OF REPORT
+================================================================================

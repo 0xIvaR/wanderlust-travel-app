@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Hotels — anyone can read, only Firebase Console can write
+    match /hotels/{hotelId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Users — each user can only read/write their own data
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

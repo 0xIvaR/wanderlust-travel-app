@@ -1,0 +1,11 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Curated images — anyone can read (app fetches them), no one can write via app
+    match /curated/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}
